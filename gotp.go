@@ -34,8 +34,8 @@ func (this *OTP) HOTP(count uint64) uint {
 	return snum % uint(math.Pow(10, float64(this.Digit)))
 }
 
-func (this *OTP) TOTP() uint {
-	count := uint64(math.Floor(float64(time.Now().Unix()-this.BaseTime) / float64(this.TimeStep)))
+func (this *OTP) TOTP(timestamp int64) uint {
+	count := uint64(math.Floor(float64(timestamp-this.BaseTime) / float64(this.TimeStep)))
 	return this.HOTP(count)
 }
 
@@ -48,7 +48,7 @@ func (this *OTP) GenerateByCount(count uint64) string {
 }
 
 func (this *OTP) GenerateByTime() string {
-	return this.formatString(this.TOTP())
+	return this.formatString(this.TOTP(time.Now().Unix()))
 }
 
 func NewGoogleAuth(secret string) *OTP {
