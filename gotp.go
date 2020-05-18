@@ -22,9 +22,7 @@ type OTP struct {
 }
 
 func (this *OTP) HOTP(count uint64) uint {
-	key := make([]byte, base32.StdEncoding.DecodedLen(len(this.Secret)))
-	base32.StdEncoding.Decode(key, this.Secret)
-	hm := hmac.New(this.Hash, key)
+	hm := hmac.New(this.Hash, this.Secret)
 	binary.Write(hm, binary.BigEndian, count)
 	hs := hm.Sum(nil)
 	offset := int(hs[len(hs)-1] & 0xF)
