@@ -9,6 +9,7 @@ import (
 	"hash"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -51,12 +52,23 @@ func (this *OTP) GenerateByTime() string {
 	return this.formatString(this.TOTP(time.Now().Unix()))
 }
 
-func NewGoogleAuth(secret string) *OTP {
+func NewGoogleAuth(secret string) (*OTP, error) {
+	if n := len(secret) % 8; n > 0 {
+		secret += strings.Repeat("=", 8-n)
+	}
+	b, err := base32.StdEncoding.DecodeString(secret)
+	if err != nil {
+		return nil, err
+	}
 	return &OTP{
 		Digit:    6,
 		TimeStep: 30,
 		BaseTime: 0,
 		Hash:     sha1.New,
-		Secret:   []byte(secret),
-	}
+		Secret:   b,
+	}, nil
+}
+
+func GenerateSecret(key []byte) string {
+	return strings.TrimRight(base32.StdEncoding.EncodeToString(key), "=")
 }
